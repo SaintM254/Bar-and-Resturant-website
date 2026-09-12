@@ -30,7 +30,7 @@ export default function Hero() {
 
         <Reveal delay={120}>
           <h1 className="mt-6 font-serif text-[clamp(2.4rem,6.2vw,4.4rem)] font-medium leading-[1.06] tracking-[-0.01em] text-[#FBF7EF]">
-            The Neighborhood
+            {SITE.name}
             <br />
             <span className="italic font-light">Bar &amp; Restaurant.</span>
           </h1>
