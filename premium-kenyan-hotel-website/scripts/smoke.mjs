@@ -144,6 +144,7 @@ if (expandBtn) {
   expandBtn.click();
   const extra = await waitFor(() => document.body.textContent.includes("Masala Chips"), 4000);
   check("clicking expands menu (Masala Chips appears)", !!extra);
+  check("USD hints shown under prices", /\$\d+\.\d{2}/.test(document.body.textContent));
 }
 
 // --- CLICK TEST 2: open a dish photo popup ---

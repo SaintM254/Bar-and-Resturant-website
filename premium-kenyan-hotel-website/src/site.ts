@@ -36,6 +36,13 @@ export const SITE = {
   kitchenTime: "12:00 — 22:00",
   morningFrom: "From 6:30",
 
+  /**
+   * Fallback shillings-per-dollar rate, used only if the free daily
+   * exchange-rate lookup is unreachable. The site refreshes the live rate
+   * automatically; update this number if it drifts far from reality.
+   */
+  kesPerUsd: 129,
+
   mapQuery: "Riverside Drive, Westlands, Nairobi, Kenya",
   mapTitle: `Map — ${NAME}, Riverside Drive, Westlands, Nairobi`,
   driverNote: `Riverside Drive, Westlands — tell your driver "${NAME}, past the fig tree."`,

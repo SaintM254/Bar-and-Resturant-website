@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import type { MenuItem } from "../data";
 import { SITE } from "../site";
+import UsdHint from "./UsdHint";
 
 interface DishModalProps {
   dish: MenuItem | null;
@@ -87,8 +88,11 @@ export default function DishModal({ dish, onClose }: DishModalProps) {
               <h3 className="font-serif text-[24px] font-medium leading-snug text-ink">
                 {current.name}
               </h3>
-              <span className="whitespace-nowrap text-[16px] font-medium tracking-tight text-clay">
-                {current.price}
+              <span className="flex shrink-0 flex-col items-end">
+                <span className="whitespace-nowrap text-[16px] font-medium tracking-tight text-clay">
+                  {current.price}
+                </span>
+                <UsdHint price={current.price} />
               </span>
             </div>
             <p className="mt-2 text-[15px] leading-relaxed text-body">{current.desc}</p>

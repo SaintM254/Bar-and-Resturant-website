@@ -4,6 +4,7 @@ import { SITE } from "../site";
 import { getMenu, type ApiDrink } from "../lib/api";
 import Reveal from "./Reveal";
 import SectionLabel from "./SectionLabel";
+import UsdHint from "./UsdHint";
 
 export default function Bar() {
   // Live bar list from the backend; falls back to the built-in list when offline.
@@ -50,8 +51,11 @@ export default function Bar() {
                     <div className="flex items-baseline gap-3">
                       <h3 className="font-serif text-[18px] font-medium text-ink">{drink.name}</h3>
                       <span className="leader" aria-hidden="true" />
-                      <span className="whitespace-nowrap text-[15px] font-medium tracking-tight text-clay">
-                        {drink.price}
+                      <span className="flex shrink-0 flex-col items-end">
+                        <span className="whitespace-nowrap text-[15px] font-medium tracking-tight text-clay">
+                          {drink.price}
+                        </span>
+                        <UsdHint price={drink.price} />
                       </span>
                     </div>
                     <p className="mt-1 text-sm leading-relaxed text-mute">{drink.desc}</p>

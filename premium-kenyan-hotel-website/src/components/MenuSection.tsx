@@ -4,6 +4,7 @@ import { getMenu } from "../lib/api";
 import Reveal from "./Reveal";
 import SectionLabel from "./SectionLabel";
 import DishModal from "./DishModal";
+import UsdHint from "./UsdHint";
 
 interface MenuRowProps {
   item: MenuItem;
@@ -46,6 +47,7 @@ function MenuRow({ item, onOpen }: MenuRowProps) {
         <span className="whitespace-nowrap text-[15px] font-medium tracking-tight text-clay">
           {item.price}
         </span>
+        <UsdHint price={item.price} />
         <span
           className="inline-flex items-center rounded-[4px] border border-[#CBBEA7] px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.16em] text-clay transition-colors duration-300 group-hover:border-clay group-hover:bg-clay group-hover:text-ivory"
           aria-hidden="true"
