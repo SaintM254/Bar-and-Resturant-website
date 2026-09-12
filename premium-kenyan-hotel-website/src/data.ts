@@ -1,3 +1,5 @@
+import heroImg from "./assets/hero.jpg";
+
 export const NAV_LINKS = [
   { label: "Home", href: "#home" },
   { label: "Menu", href: "#menu" },
@@ -194,7 +196,7 @@ export const CONTACT = {
 };
 
 export const IMAGES = {
-  hero: "/images/hero.jpg",
+  hero: heroImg,
   restaurant: px(279768, 1400),
   grillFood: px(18330967, 1200),
   morningTable: px(18071816, 1200),
