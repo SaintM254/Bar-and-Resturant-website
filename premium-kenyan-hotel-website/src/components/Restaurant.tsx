@@ -1,4 +1,5 @@
 import { IMAGES } from "../data";
+import { SITE } from "../site";
 import Reveal from "./Reveal";
 import SectionLabel from "./SectionLabel";
 
@@ -23,7 +24,7 @@ export default function Restaurant() {
               <div className="img-zoom relative">
                 <img
                   src={IMAGES.restaurant}
-                  alt="The dining room at The Acacia House, set for lunch"
+                  alt={`The dining room at ${SITE.name}, set for lunch`}
                   className="h-[320px] w-full object-cover sm:h-[440px] lg:h-[560px]"
                   loading="lazy"
                 />

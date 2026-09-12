@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { CONTACT } from "../data";
+import { SITE } from "../site";
 import { ApiError, createReservation } from "../lib/api";
 import Reveal from "./Reveal";
 import SectionLabel from "./SectionLabel";
@@ -101,7 +102,7 @@ export default function Reservation() {
           {/* Left: invitation */}
           <div className="lg:col-span-5">
             <Reveal>
-              <SectionLabel num="06" title="Reservations" />
+              <SectionLabel num="07" title="Reservations" />
             </Reveal>
             <Reveal delay={100}>
               <h2 className="mt-7 font-serif text-[clamp(1.8rem,3.4vw,2.6rem)] font-medium leading-[1.18] tracking-[-0.01em] text-ink">
@@ -134,9 +135,7 @@ export default function Reservation() {
                   <span className="text-[11px] font-medium uppercase tracking-[0.2em] text-mute">
                     Kitchen
                   </span>
-                  <span className="text-sm text-body">
-                    Breakfast 6:30 — 10:30 · All day from 12:00
-                  </span>
+                  <span className="text-sm text-body">{SITE.kitchenLine}</span>
                 </div>
               </div>
             </Reveal>

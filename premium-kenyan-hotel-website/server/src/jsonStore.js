@@ -5,12 +5,13 @@
 import fs from "fs";
 import path from "path";
 import { config } from "./config.js";
-import { seedMenuItems, seedDrinks } from "./seed.js";
+import { seedMenuItems, seedDrinks, seedGallery } from "./seed.js";
 
 const FILES = {
   reservations: "reservations.json",
   menuItems: "menu-items.json",
   drinks: "drinks.json",
+  gallery: "gallery.json",
 };
 
 const filePath = (collection) => path.join(config.dataDir, FILES[collection]);
@@ -38,6 +39,7 @@ export function createJsonStore() {
     reservations: readJson(filePath("reservations"), null) ?? [],
     menuItems: readJson(filePath("menuItems"), null) ?? seedMenuItems(),
     drinks: readJson(filePath("drinks"), null) ?? seedDrinks(),
+    gallery: readJson(filePath("gallery"), null) ?? seedGallery(),
   };
   const persist = () => {
     for (const key of Object.keys(FILES)) writeAtomic(filePath(key), s[key]);
@@ -130,6 +132,31 @@ export function createJsonStore() {
       const idx = s.drinks.findIndex((d) => d.id === id);
       if (idx === -1) return null;
       const [removed] = s.drinks.splice(idx, 1);
+      persist();
+      return removed;
+    },
+
+    async listGallery({ visibleOnly }) {
+      const rows = visibleOnly ? s.gallery.filter((g) => g.visible) : [...s.gallery];
+      rows.sort((a, b) => a.position - b.position || (a.id < b.id ? -1 : 1));
+      return rows;
+    },
+    async createGalleryItem(row) {
+      s.gallery.push(row);
+      persist();
+      return row;
+    },
+    async updateGalleryItem(id, patch) {
+      const row = s.gallery.find((g) => g.id === id);
+      if (!row) return null;
+      Object.assign(row, patch);
+      persist();
+      return row;
+    },
+    async deleteGalleryItem(id) {
+      const idx = s.gallery.findIndex((g) => g.id === id);
+      if (idx === -1) return null;
+      const [removed] = s.gallery.splice(idx, 1);
       persist();
       return removed;
     },

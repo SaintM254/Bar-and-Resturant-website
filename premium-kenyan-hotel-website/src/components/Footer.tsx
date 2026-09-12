@@ -1,4 +1,6 @@
 import { CONTACT, NAV_LINKS } from "../data";
+import { SITE } from "../site";
+import logoImg from "../assets/logo.png";
 
 export default function Footer() {
   const year = new Date().getFullYear();
@@ -9,14 +11,23 @@ export default function Footer() {
         <div className="grid gap-12 md:grid-cols-12">
           {/* Brand */}
           <div className="md:col-span-4">
-            <p className="font-serif text-2xl font-medium tracking-tight text-[#F6F0E4]">
-              The Acacia House
-            </p>
-            <p className="mt-1 text-[10px] font-medium uppercase tracking-[0.3em] text-[#A99B84]">
-              Hotel · Restaurant · Bar
-            </p>
+            <div className="flex items-center gap-3">
+              <img
+                src={logoImg}
+                alt={`${SITE.name} logo`}
+                className="h-11 w-11 shrink-0 rounded-full object-cover"
+              />
+              <div>
+                <p className="font-serif text-2xl font-medium tracking-tight text-[#F6F0E4]">
+                  {SITE.name}
+                </p>
+                <p className="mt-1 text-[10px] font-medium uppercase tracking-[0.3em] text-[#A99B84]">
+                  {SITE.tagline}
+                </p>
+              </div>
+            </div>
             <p className="mt-6 max-w-xs text-sm leading-[1.8] text-[#B9AC95]">
-              A small Kenyan hotel in Westlands, Nairobi — good food, a well-stocked bar and quiet
+              A small Kenyan hotel in {SITE.place} — good food, a well-stocked bar and quiet
               rooms, all under one roof. Karibu.
             </p>
           </div>
@@ -60,7 +71,7 @@ export default function Footer() {
                 {CONTACT.city}
               </li>
               <li>
-                <a href="tel:+254712345678" className="transition-colors hover:text-[#F6F0E4]">
+                <a href={SITE.phoneHref} className="transition-colors hover:text-[#F6F0E4]">
                   {CONTACT.phone}
                 </a>
               </li>
@@ -83,15 +94,15 @@ export default function Footer() {
             <ul className="mt-5 space-y-3 text-sm text-[#D9CDB6]">
               <li className="flex justify-between gap-6">
                 <span>Breakfast</span>
-                <span className="text-[#B9AC95]">6:30 — 10:30</span>
+                <span className="text-[#B9AC95]">{SITE.breakfastTime}</span>
               </li>
               <li className="flex justify-between gap-6">
                 <span>Kitchen</span>
-                <span className="text-[#B9AC95]">12:00 — 22:00</span>
+                <span className="text-[#B9AC95]">{SITE.kitchenTime}</span>
               </li>
               <li className="flex justify-between gap-6">
                 <span>The Bar</span>
-                <span className="text-[#B9AC95]">Until midnight</span>
+                <span className="text-[#B9AC95]">{SITE.barShort}</span>
               </li>
               <li className="flex justify-between gap-6">
                 <span>Front Desk</span>
@@ -102,7 +113,9 @@ export default function Footer() {
         </div>
 
         <div className="mt-14 flex flex-col items-start justify-between gap-3 border-t border-[#3B3022] pt-7 text-[13px] text-[#93876F] sm:flex-row sm:items-center">
-          <p>© {year} The Acacia House, Nairobi. All rights reserved.</p>
+          <p>
+            © {year} {SITE.name}, {SITE.city}. All rights reserved.
+          </p>
           <p className="flex items-center gap-4">
             <span>Good food. Good company.</span>
             <a href="#/admin" className="text-[#6E6455] transition-colors hover:text-[#F6F0E4]">

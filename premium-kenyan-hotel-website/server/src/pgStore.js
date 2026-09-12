@@ -6,7 +6,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import pg from "pg";
-import { seedMenuItems, seedDrinks } from "./seed.js";
+import { seedMenuItems, seedDrinks, seedGallery } from "./seed.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const LIVE = `status NOT IN ('cancelled','no-show')`;
@@ -47,6 +47,15 @@ const mapDrink = (d) => ({
   available: d.available,
 });
 
+const mapImage = (g) => ({
+  id: g.id,
+  caption: g.caption,
+  category: g.category,
+  path: g.path,
+  position: Number(g.position),
+  visible: g.visible,
+});
+
 export function createPgStore(connectionString, poolOverride) {
   const pool =
     poolOverride ??
@@ -80,6 +89,12 @@ export function createPgStore(connectionString, poolOverride) {
         const seed = seedDrinks();
         for (const drink of seed) await store.createDrink(drink);
         console.log(`  Seeded ${seed.length} bar drinks.`);
+      }
+      const gallery = await store.listGallery({ visibleOnly: false });
+      if (gallery.length === 0) {
+        const seed = seedGallery();
+        for (const img of seed) await store.createGalleryItem(img);
+        console.log(`  Seeded ${seed.length} gallery photos.`);
       }
     },
 
@@ -248,6 +263,56 @@ export function createPgStore(connectionString, poolOverride) {
     async deleteDrink(id) {
       const { rows } = await pool.query("DELETE FROM drinks WHERE id = $1 RETURNING *", [id]);
       return rows.length ? mapDrink(rows[0]) : null;
+    },
+
+    async listGallery({ visibleOnly }) {
+      const { rows } = await pool.query(
+        visibleOnly
+          ? "SELECT * FROM gallery_images WHERE visible = TRUE ORDER BY position, id"
+          : "SELECT * FROM gallery_images ORDER BY position, id"
+      );
+      return rows.map(mapImage);
+    },
+
+    async createGalleryItem(img) {
+      const { rows } = await pool.query(
+        `INSERT INTO gallery_images (id, caption, category, path, position, visible)
+         VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
+        [img.id, img.caption, img.category, img.path, img.position, img.visible]
+      );
+      return mapImage(rows[0]);
+    },
+
+    async updateGalleryItem(id, patch) {
+      const cols = {
+        caption: "caption",
+        category: "category",
+        path: "path",
+        position: "position",
+        visible: "visible",
+      };
+      const sets = [];
+      const params = [];
+      for (const [key, value] of Object.entries(patch)) {
+        if (!(key in cols)) continue;
+        params.push(value);
+        sets.push(`${cols[key]} = $${params.length}`);
+      }
+      if (sets.length === 0) {
+        const { rows } = await pool.query("SELECT * FROM gallery_images WHERE id = $1", [id]);
+        return rows.length ? mapImage(rows[0]) : null;
+      }
+      params.push(id);
+      const { rows } = await pool.query(
+        `UPDATE gallery_images SET ${sets.join(", ")} WHERE id = $${params.length} RETURNING *`,
+        params
+      );
+      return rows.length ? mapImage(rows[0]) : null;
+    },
+
+    async deleteGalleryItem(id) {
+      const { rows } = await pool.query("DELETE FROM gallery_images WHERE id = $1 RETURNING *", [id]);
+      return rows.length ? mapImage(rows[0]) : null;
     },
 
     async close() {

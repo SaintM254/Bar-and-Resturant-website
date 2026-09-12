@@ -117,6 +117,24 @@ if (barLink) {
   );
 }
 
+// --- GALLERY TEST: nav link, photos, lightbox ---
+const galleryLink = document.querySelector('header nav a[href="#gallery"]');
+check("found top-bar 'Gallery' link", !!galleryLink);
+if (galleryLink) {
+  galleryLink.click();
+  await tick(400);
+  check("clicking Gallery sets address to #gallery", window.location.hash === "#gallery", window.location.hash);
+}
+const gallery = document.getElementById("gallery");
+check("gallery section present", !!gallery);
+const photos = gallery ? gallery.querySelectorAll('button[aria-label^="Enlarge photo:"]') : [];
+check("gallery shows photos", photos.length >= 4, `${photos.length} photo(s)`);
+if (photos.length > 0) {
+  photos[0].click();
+  await tick(400);
+  check("clicking a photo opens the lightbox", !!document.querySelector('[role="dialog"]'));
+}
+
 // --- CLICK TEST 1: expand the full menu ---
 const expandBtn = [...document.querySelectorAll("button")].find((b) =>
   b.textContent.includes("View Full Menu")

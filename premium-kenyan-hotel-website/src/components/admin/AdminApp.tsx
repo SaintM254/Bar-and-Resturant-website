@@ -1,9 +1,17 @@
 import { useState, type FormEvent } from "react";
+import { SITE } from "../../site";
 import { ApiError, adminLogin, adminLogout, getToken } from "../../lib/api";
 import BookingsTab from "./BookingsTab";
 import MenuTab from "./MenuTab";
+import GalleryTab from "./GalleryTab";
 
-type Tab = "bookings" | "menu";
+type Tab = "bookings" | "menu" | "gallery";
+
+const TABS: { key: Tab; label: string }[] = [
+  { key: "bookings", label: "Reservations" },
+  { key: "menu", label: "Menu & Bar" },
+  { key: "gallery", label: "Gallery" },
+];
 
 export default function AdminApp() {
   const [authed, setAuthed] = useState(() => getToken() !== null);
@@ -40,9 +48,9 @@ export default function AdminApp() {
       <div className="flex min-h-screen items-center justify-center bg-ivory px-5 py-16">
         <div className="w-full max-w-md border border-line bg-parchment p-8 sm:p-10">
           <p className="text-[11px] font-medium uppercase tracking-[0.26em] text-gold">Staff only</p>
-          <h1 className="mt-3 font-serif text-3xl font-medium text-ink">Acacia House Admin</h1>
+          <h1 className="mt-3 font-serif text-3xl font-medium text-ink">{SITE.shortName} Admin</h1>
           <p className="mt-3 text-sm leading-relaxed text-body">
-            Sign in to see reservations and update the menu.
+            Sign in to see reservations and update the menu and gallery.
           </p>
           <form onSubmit={onLogin} className="mt-7">
             {loginError && (
@@ -80,27 +88,21 @@ export default function AdminApp() {
       <header className="sticky top-0 z-10 border-b border-line bg-parchment/95 backdrop-blur">
         <div className="mx-auto flex max-w-[1100px] flex-wrap items-center gap-3 px-5 py-4 sm:px-8">
           <div className="mr-auto">
-            <p className="font-serif text-xl font-medium">Acacia House · Staff</p>
+            <p className="font-serif text-xl font-medium">{SITE.shortName} · Staff</p>
           </div>
-          <nav className="flex gap-2" aria-label="Admin sections">
-            <button
-              type="button"
-              onClick={() => setTab("bookings")}
-              className={`rounded-[4px] px-4 py-2 text-sm font-medium transition-colors ${
-                tab === "bookings" ? "bg-ink text-ivory" : "text-body hover:bg-sand"
-              }`}
-            >
-              Reservations
-            </button>
-            <button
-              type="button"
-              onClick={() => setTab("menu")}
-              className={`rounded-[4px] px-4 py-2 text-sm font-medium transition-colors ${
-                tab === "menu" ? "bg-ink text-ivory" : "text-body hover:bg-sand"
-              }`}
-            >
-              Menu & Bar
-            </button>
+          <nav className="flex flex-wrap gap-2" aria-label="Admin sections">
+            {TABS.map((t) => (
+              <button
+                key={t.key}
+                type="button"
+                onClick={() => setTab(t.key)}
+                className={`rounded-[4px] px-4 py-2 text-sm font-medium transition-colors ${
+                  tab === t.key ? "bg-ink text-ivory" : "text-body hover:bg-sand"
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
           </nav>
           <a href="#home" className="text-sm text-mute hover:text-clay">
             View website
@@ -114,8 +116,10 @@ export default function AdminApp() {
       <main className="mx-auto max-w-[1100px] px-5 py-10 sm:px-8">
         {tab === "bookings" ? (
           <BookingsTab onSessionExpired={onSessionExpired} />
-        ) : (
+        ) : tab === "menu" ? (
           <MenuTab onSessionExpired={onSessionExpired} />
+        ) : (
+          <GalleryTab onSessionExpired={onSessionExpired} />
         )}
       </main>
     </div>

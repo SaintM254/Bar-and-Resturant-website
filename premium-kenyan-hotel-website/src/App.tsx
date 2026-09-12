@@ -9,6 +9,7 @@ import Experience from "./components/Experience";
 import Reservation from "./components/Reservation";
 import Location from "./components/Location";
 import Footer from "./components/Footer";
+import Gallery from "./components/Gallery";
 import Reveal from "./components/Reveal";
 import AdminApp from "./components/admin/AdminApp";
 
@@ -65,6 +66,7 @@ export default function App() {
         <MenuSection />
         <Restaurant />
         <Bar />
+        <Gallery />
         <PullQuote />
         <Experience />
         <Reservation />

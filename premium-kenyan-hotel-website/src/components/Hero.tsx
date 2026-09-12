@@ -1,4 +1,5 @@
 import { IMAGES } from "../data";
+import { SITE } from "../site";
 import Reveal from "./Reveal";
 
 export default function Hero() {
@@ -8,7 +9,7 @@ export default function Hero() {
       <div className="absolute inset-0">
         <img
           src={IMAGES.hero}
-          alt="A waitress serving African guests their meal at The Acacia House, Nairobi"
+          alt={`A waitress serving African guests their meal at ${SITE.name}, Nairobi`}
           className="h-full w-full object-cover"
           loading="eager"
         />
@@ -22,7 +23,7 @@ export default function Hero() {
           <div className="flex items-center gap-3">
             <span className="h-px w-10 bg-[#E9D9B8]/70" aria-hidden="true" />
             <p className="text-[11px] font-medium uppercase tracking-[0.26em] text-[#F3E9D6]/90">
-              The Acacia House · Westlands, Nairobi
+              {SITE.heroEyebrow}
             </p>
           </div>
         </Reveal>
@@ -57,9 +58,9 @@ export default function Hero() {
       {/* Bottom strip */}
       <div className="absolute inset-x-0 bottom-0 hidden border-t border-[#FBF7EF]/15 sm:block">
         <div className="mx-auto flex max-w-[1200px] items-center justify-between px-8 py-4 text-[11px] font-medium uppercase tracking-[0.2em] text-[#F3E9D6]/75">
-          <span>Open Daily · 6:30 AM — 11:00 PM</span>
+          <span>{SITE.heroHours}</span>
           <span className="hidden lg:inline">Restaurant · Bar · Rooms</span>
-          <span>+254 712 345 678</span>
+          <span>{SITE.phone}</span>
         </div>
       </div>
     </section>

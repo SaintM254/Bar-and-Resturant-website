@@ -1,4 +1,4 @@
-// Talks to the Acacia House backend.
+// Talks to the hotel backend (brand name lives in src/site.ts).
 // - On the public site it uses the live API baked in at build time (VITE_API_URL).
 // - On local hostnames (localhost, Arena preview) it uses same-origin /api,
 //   which the dev/preview server forwards to the local backend — so testing
@@ -32,6 +32,22 @@ export interface ApiDrink {
   desc: string;
   price: string;
   available: boolean;
+}
+
+export interface ApiGalleryImage {
+  id: string;
+  caption: string;
+  category: string;
+  src: string;
+}
+
+export interface AdminGalleryImage {
+  id: string;
+  caption: string;
+  category: string;
+  path: string;
+  position: number;
+  visible: boolean;
 }
 
 export interface ApiMenu {
@@ -162,6 +178,11 @@ export const createReservation = (input: ReservationInput) =>
     45000 // free-tier backends nap when idle; the first request can take ~30s to wake them
   );
 
+export const getGallery = () => req<{ images: ApiGalleryImage[] }>("/api/gallery");
+
+/** Turn a stored photo location into a browser URL (site path \u2192 API host, full URL untouched). */
+export const resolveAsset = (src: string) => (src.startsWith("/") ? `${API_BASE}${src}` : src);
+
 /* ---------- staff ---------- */
 
 export const adminLogin = async (password: string) => {
@@ -237,6 +258,30 @@ export const adminUpdateDrink = (id: string, patch: Partial<AdminDrink>) =>
 
 export const adminDeleteDrink = (id: string) =>
   adminReq<{ message: string }>(`/api/admin/menu/drinks/${id}`, { method: "DELETE" });
+
+export const adminGetGallery = () =>
+  adminReq<{ images: AdminGalleryImage[] }>("/api/admin/gallery");
+
+export const adminCreateGalleryItem = (item: {
+  caption: string;
+  category: string;
+  path: string;
+  position?: number;
+  visible?: boolean;
+}) =>
+  adminReq<{ message: string; item: AdminGalleryImage }>("/api/admin/gallery", {
+    method: "POST",
+    body: JSON.stringify(item),
+  });
+
+export const adminUpdateGalleryItem = (id: string, patch: Partial<AdminGalleryImage>) =>
+  adminReq<{ message: string; item: AdminGalleryImage }>(`/api/admin/gallery/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(patch),
+  });
+
+export const adminDeleteGalleryItem = (id: string) =>
+  adminReq<{ message: string }>(`/api/admin/gallery/${id}`, { method: "DELETE" });
 
 export const isOnline = async () => {
   try {

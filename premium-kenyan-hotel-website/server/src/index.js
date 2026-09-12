@@ -11,6 +11,7 @@ import cors from "cors";
 import { config, RESERVATION_STATUS, MENU_GROUP_LABELS } from "./config.js";
 import { getStore, newId, newBookingRef } from "./store.js";
 import { slugify } from "./seed.js";
+import { mountGallery } from "./gallery.js";
 import {
   validateReservation,
   validateMenuItem,
@@ -36,6 +37,7 @@ if (config.allowedOrigins.length > 0) {
 const ah = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
 const store = await getStore();
+mountGallery(app, store);
 
 /* ---------------- public helpers ---------------- */
 

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import type { MenuItem } from "../data";
+import { SITE } from "../site";
 
 interface DishModalProps {
   dish: MenuItem | null;
@@ -72,7 +73,7 @@ export default function DishModal({ dish, onClose }: DishModalProps) {
         <div className="aspect-[4/3] w-full overflow-hidden bg-cream">
           <img
             src={current.img}
-            alt={`${current.name}, as served at The Acacia House`}
+            alt={`${current.name}, as served at ${SITE.name}`}
             className="h-full w-full object-cover"
             decoding="async"
           />
@@ -90,7 +91,7 @@ export default function DishModal({ dish, onClose }: DishModalProps) {
           <p className="mt-2 text-[15px] leading-relaxed text-body">{current.desc}</p>
           <div className="mt-6 flex items-center justify-between border-t border-line pt-4">
             <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-mute">
-              The Acacia House · Kitchen
+              {SITE.name} · Kitchen
             </p>
             <a
               href="#reserve"

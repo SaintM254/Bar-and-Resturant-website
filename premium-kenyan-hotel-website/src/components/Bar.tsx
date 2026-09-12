@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { BAR_DRINKS, IMAGES } from "../data";
+import { SITE } from "../site";
 import { getMenu, type ApiDrink } from "../lib/api";
 import Reveal from "./Reveal";
 import SectionLabel from "./SectionLabel";
@@ -19,6 +20,7 @@ export default function Bar() {
       cancelled = true;
     };
   }, []);
+
   return (
     <section id="bar" className="border-b border-line bg-sand py-20 md:py-28">
       <div className="mx-auto max-w-[1200px] px-5 sm:px-8">
@@ -71,7 +73,7 @@ export default function Bar() {
               <div className="img-zoom">
                 <img
                   src={IMAGES.bar}
-                  alt="The wooden bar counter at The Acacia House in the evening"
+                  alt={`The wooden bar counter at ${SITE.name} in the evening`}
                   className="h-[320px] w-full object-cover sm:h-[440px] lg:h-[560px]"
                   loading="lazy"
                 />

@@ -82,5 +82,26 @@ assert("edit drink", (await store.listDrinks()).find((d) => d.id === "x-juice").
 await store.deleteDrink("x-juice");
 assert("drinks count restored", (await store.listDrinks()).length === 6);
 
+// --- gallery CRUD ---
+const gallerySeed = await store.listGallery({ visibleOnly: false });
+assert("gallery seeded (8 photos)", gallerySeed.length === 8, `${gallerySeed.length} photos`);
+assert("gallery order", gallerySeed[0].position === 1 && gallerySeed[7].position === 8);
+await store.createGalleryItem({
+  id: "x-test",
+  caption: "X",
+  category: "Test",
+  path: "https://example.com/x.jpg",
+  position: 50,
+  visible: true,
+});
+assert("add photo", (await store.listGallery({ visibleOnly: false })).length === 9);
+await store.updateGalleryItem("x-test", { visible: false });
+const visOnly = await store.listGallery({ visibleOnly: true });
+assert("visible filter hides photo", visOnly.length === 8 && !visOnly.some((g) => g.id === "x-test"));
+assert("edit photo", (await store.updateGalleryItem("x-test", { caption: "X2" })).caption === "X2");
+assert("edit missing -> null", (await store.updateGalleryItem("nope", { caption: "z" })) === null);
+assert("delete photo", (await store.deleteGalleryItem("x-test")).id === "x-test");
+assert("gallery count restored", (await store.listGallery({ visibleOnly: false })).length === 8);
+
 await store.close();
 console.log(process.exitCode ? "\nPG STORE: failures." : "\nPG STORE: all checks passed.");

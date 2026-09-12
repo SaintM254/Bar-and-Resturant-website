@@ -1,4 +1,5 @@
 import { IMAGES } from "../data";
+import { SITE } from "../site";
 import Reveal from "./Reveal";
 import SectionLabel from "./SectionLabel";
 
@@ -17,7 +18,7 @@ export default function Experience() {
           {/* Text column */}
           <div className="flex flex-col justify-center lg:col-span-5">
             <Reveal>
-              <SectionLabel num="05" title="The Hotel" />
+              <SectionLabel num="06" title="The Hotel" />
             </Reveal>
             <Reveal delay={100}>
               <h2 className="mt-7 font-serif text-[clamp(1.8rem,3.4vw,2.6rem)] font-medium leading-[1.18] tracking-[-0.01em] text-ink">
@@ -26,7 +27,7 @@ export default function Experience() {
             </Reveal>
             <Reveal delay={200}>
               <p className="mt-6 text-[15.5px] leading-[1.85] text-body">
-                The Acacia House is a small hotel first — the restaurant and bar simply grew out of
+                {SITE.name} is a small hotel first — the restaurant and bar simply grew out of
                 how we like to host. Guests can move from breakfast in the courtyard to a working
                 lunch, an evening at the bar and a quiet room upstairs, all in one address.
               </p>
@@ -63,7 +64,7 @@ export default function Experience() {
                 <div className="img-zoom h-full">
                   <img
                     src={IMAGES.room}
-                    alt="A calm, neutral guest room at The Acacia House"
+                    alt={`A calm, neutral guest room at ${SITE.name}`}
                     className="h-[260px] w-full object-cover sm:h-[420px] lg:h-[480px]"
                     loading="lazy"
                   />

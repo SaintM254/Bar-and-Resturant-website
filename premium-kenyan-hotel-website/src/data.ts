@@ -1,3 +1,4 @@
+import { SITE } from "./site";
 import heroImg from "./assets/hero.jpg";
 
 export const NAV_LINKS = [
@@ -5,6 +6,7 @@ export const NAV_LINKS = [
   { label: "Menu", href: "#menu" },
   { label: "About", href: "#about" },
   { label: "Bar", href: "#bar" },
+  { label: "Gallery", href: "#gallery" },
   { label: "Contact", href: "#contact" },
 ];
 
@@ -189,12 +191,12 @@ export const BAR_DRINKS: (Omit<MenuItem, "img" | "thumb"> & { id?: string })[] =
 ];
 
 export const CONTACT = {
-  address: "14 Riverside Drive, Westlands",
-  city: "Nairobi, Kenya",
-  phone: "+254 712 345 678",
-  email: "reservations@acaciahouse.co.ke",
-  hours: "Open daily · 6:30 AM – 11:00 PM",
-  barHours: "The bar stays open until midnight",
+  address: SITE.address,
+  city: SITE.city,
+  phone: SITE.phone,
+  email: SITE.email,
+  hours: SITE.hours,
+  barHours: SITE.barHours,
 };
 
 export const IMAGES = {

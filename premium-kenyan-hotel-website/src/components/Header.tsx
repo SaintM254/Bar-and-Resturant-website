@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { NAV_LINKS } from "../data";
+import { SITE } from "../site";
+import logoImg from "../assets/logo.png";
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
@@ -33,20 +35,32 @@ export default function Header() {
       >
         <div className="mx-auto flex h-[72px] max-w-[1200px] items-center justify-between px-5 sm:px-8">
           {/* Brand */}
-          <a href="#home" className="flex flex-col leading-none" aria-label="The Acacia House — home">
-            <span
-              className={`font-serif text-[21px] font-medium tracking-tight transition-colors duration-500 ${
-                solid ? "text-ink" : "text-[#FBF7EF]"
-              }`}
-            >
-              The Acacia House
-            </span>
-            <span
-              className={`mt-1 text-[9px] font-medium uppercase tracking-[0.3em] transition-colors duration-500 ${
-                solid ? "text-mute" : "text-[#FBF7EF]/70"
-              }`}
-            >
-              Hotel · Restaurant · Bar
+          <a
+            href="#home"
+            className="flex items-center gap-2.5"
+            aria-label={`${SITE.name} — home`}
+          >
+            <img
+              src={logoImg}
+              alt=""
+              aria-hidden="true"
+              className="h-10 w-10 shrink-0 rounded-full object-cover"
+            />
+            <span className="flex flex-col leading-none">
+              <span
+                className={`font-serif text-[21px] font-medium tracking-tight transition-colors duration-500 ${
+                  solid ? "text-ink" : "text-[#FBF7EF]"
+                }`}
+              >
+                {SITE.name}
+              </span>
+              <span
+                className={`mt-1 text-[9px] font-medium uppercase tracking-[0.3em] transition-colors duration-500 ${
+                  solid ? "text-mute" : "text-[#FBF7EF]/70"
+                }`}
+              >
+                {SITE.tagline}
+              </span>
             </span>
           </a>
 
@@ -123,7 +137,7 @@ export default function Header() {
               Reserve a Table
             </a>
             <p className="mt-6 text-center text-sm text-mute">
-              Westlands, Nairobi · +254 712 345 678
+              {SITE.place} · {SITE.phone}
             </p>
           </div>
         </nav>

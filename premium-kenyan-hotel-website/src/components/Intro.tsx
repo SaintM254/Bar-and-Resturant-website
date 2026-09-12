@@ -1,10 +1,11 @@
+import { SITE } from "../site";
 import Reveal from "./Reveal";
 import SectionLabel from "./SectionLabel";
 
 const HOURS = [
-  { label: "Breakfast", time: "6:30 — 10:30" },
-  { label: "Kitchen", time: "12:00 — 22:00" },
-  { label: "The Bar", time: "Until Midnight" },
+  { label: "Breakfast", time: SITE.breakfastTime },
+  { label: "Kitchen", time: SITE.kitchenTime },
+  { label: "The Bar", time: SITE.barShort },
 ];
 
 export default function Intro() {
@@ -25,7 +26,7 @@ export default function Intro() {
           <p className="mx-auto mt-6 max-w-2xl text-center text-[15.5px] leading-[1.85] text-body">
             From a relaxed breakfast to an evening drink, our restaurant and bar bring together
             fresh food, warm service and a comfortable atmosphere for every occasion — whether you
-            are staying the night or simply passing through Westlands.
+            are staying the night or simply passing through {SITE.place}.
           </p>
         </Reveal>
 

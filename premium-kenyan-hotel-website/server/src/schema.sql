@@ -40,3 +40,13 @@ CREATE TABLE IF NOT EXISTS drinks (
   price_kes   INTEGER NOT NULL CHECK (price_kes >= 0),
   available   BOOLEAN NOT NULL DEFAULT TRUE
 );
+
+CREATE TABLE IF NOT EXISTS gallery_images (
+  id        TEXT PRIMARY KEY,
+  caption   TEXT NOT NULL,
+  category  TEXT NOT NULL,
+  path      TEXT NOT NULL,
+  position  INTEGER NOT NULL DEFAULT 0,
+  visible   BOOLEAN NOT NULL DEFAULT TRUE
+);
+CREATE INDEX IF NOT EXISTS idx_gallery_visible ON gallery_images (visible, position);

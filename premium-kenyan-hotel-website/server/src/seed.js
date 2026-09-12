@@ -65,3 +65,25 @@ export function slugify(name) {
     .replace(/(^-|-$)/g, "")
     .slice(0, 60);
 }
+
+export function seedGallery() {
+  const photo = (file, caption, category, position) => ({
+    id: file.replace(/\.jpg$/, ""),
+    caption,
+    category,
+    path: `/gallery/${file}`,
+    position,
+    visible: true,
+  });
+
+  return [
+    photo("restaurant-1.jpg", "The dining room at dusk", "Restaurant", 1),
+    photo("restaurant-2.jpg", "Nyama choma over charcoal", "Restaurant", 2),
+    photo("bar-1.jpg", "Dawa hour at the bar", "Bar", 3),
+    photo("bar-2.jpg", "Chai, poured the slow way", "Bar", 4),
+    photo("rooms-1.jpg", "Quiet rooms upstairs", "Rooms", 5),
+    photo("rooms-2.jpg", "Breakfast in bed, Kenyan style", "Rooms", 6),
+    photo("outdoors-1.jpg", "Sundowners under the acacia", "Outdoors", 7),
+    photo("outdoors-2.jpg", "The lantern-lit courtyard", "Outdoors", 8),
+  ];
+}
