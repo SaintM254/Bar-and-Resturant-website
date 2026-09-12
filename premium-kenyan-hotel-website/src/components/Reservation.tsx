@@ -50,13 +50,39 @@ const today = new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
 export default function Reservation() {
   const [form, setForm] = useState<FormState>(initialForm);
   const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [bookingRef, setBookingRef] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
-  const update = (key: keyof FormState, value: string) =>
+  const update = (key: keyof FormState, value: string) => {
     setForm((f) => ({ ...f, [key]: value }));
+    setError(null);
+  };
 
-  const onSubmit = (e: FormEvent) => {
+  const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    if (sending) return;
+    setSending(true);
+    setError(null);
+    try {
+      const res = await createReservation(form);
+      setBookingRef(res.reservation.ref);
+      setSubmitted(true);
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 0) {
+        setError(
+          `Our online booking is unreachable right now — please call us at ${CONTACT.phone} and we will reserve your table.`
+        );
+      } else if (err instanceof ApiError && err.fields) {
+        setError(Object.values(err.fields).join(" "));
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Something went wrong — please try again or call us.");
+      }
+    } finally {
+      setSending(false);
+    }
   };
 
   const displayDate = form.date
@@ -161,6 +187,11 @@ export default function Reservation() {
               </div>
             ) : (
               <form onSubmit={onSubmit} className="border border-line bg-parchment p-6 sm:p-9">
+                {error && (
+                  <div role="alert" className="mb-6 border border-clay/50 bg-clay/10 px-5 py-4 text-sm leading-relaxed text-clay">
+                    {error}
+                  </div>
+                )}
                 <div className="grid gap-5 sm:grid-cols-2">
                   <div>
                     <label htmlFor="r-name" className="field-label">

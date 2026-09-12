@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import Header from "./components/Header";
 import Hero from "./components/Hero";
 import Intro from "./components/Intro";
@@ -9,6 +10,21 @@ import Reservation from "./components/Reservation";
 import Location from "./components/Location";
 import Footer from "./components/Footer";
 import Reveal from "./components/Reveal";
+import AdminApp from "./components/admin/AdminApp";
+
+function useIsAdminRoute() {
+  const read = () => window.location.hash.startsWith("#/admin");
+  const [isAdmin, setIsAdmin] = useState(read);
+  useEffect(() => {
+    const onHash = () => {
+      setIsAdmin(read());
+      window.scrollTo(0, 0);
+    };
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
+  return isAdmin;
+}
 
 function PullQuote() {
   return (

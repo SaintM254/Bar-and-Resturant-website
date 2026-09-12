@@ -1,5 +1,6 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { FEATURED_MENU, EXTRA_MENU, type MenuItem } from "../data";
+import { getMenu } from "../lib/api";
 import Reveal from "./Reveal";
 import SectionLabel from "./SectionLabel";
 import DishModal from "./DishModal";

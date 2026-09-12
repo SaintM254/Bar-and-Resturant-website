@@ -9,11 +9,13 @@ export const NAV_LINKS = [
 ];
 
 export interface MenuItem {
+  id?: string;
   name: string;
   desc: string;
   price: string;
   img: string;
   thumb: string;
+  available?: boolean;
 }
 
 /* Full-bleed / editorial images */
