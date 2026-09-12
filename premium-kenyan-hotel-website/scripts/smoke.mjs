@@ -184,6 +184,11 @@ if (nameInput && phoneInput && dateInput) {
     return m ? m[0] : null;
   }, 12000);
   check("reservation submits to backend, ref shown", !!ref, ref || "no ref appeared");
+  check("receipt appears with booking code", !!document.getElementById("booking-receipt"));
+  const printBtn = [...document.querySelectorAll("button")].find((b) =>
+    (b.textContent || "").includes("Print / Save PDF")
+  );
+  check("receipt has a Print button", !!printBtn);
 }
 
 // --- STAFF AREA TEST: #/admin switches view, logs in, shows bookings ---

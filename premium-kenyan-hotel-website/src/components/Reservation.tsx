@@ -4,6 +4,7 @@ import { SITE } from "../site";
 import { ApiError, createReservation } from "../lib/api";
 import Reveal from "./Reveal";
 import SectionLabel from "./SectionLabel";
+import BookingReceipt from "./BookingReceipt";
 
 const TIME_SLOTS = [
   "7:00 AM",
@@ -164,13 +165,19 @@ export default function Reservation() {
                   phone within the hour, between 8:00 and 21:00.
                 </p>
                 {bookingRef && (
-                  <p className="mt-6 inline-block border border-dashed border-gold bg-ivory px-5 py-3 text-sm text-body">
-                    Booking reference:{" "}
-                    <span className="font-semibold tracking-wider text-ink">{bookingRef}</span>
-                    <span className="mt-1 block text-[13px] text-mute">
-                      Please show this code when you arrive.
-                    </span>
-                  </p>
+                  <div className="mt-8 w-full max-w-[440px]">
+                    <BookingReceipt
+                      details={{
+                        ref: bookingRef,
+                        name: form.name,
+                        phone: form.phone,
+                        date: form.date,
+                        time: form.time,
+                        guestsLabel: form.guests,
+                        request: form.request,
+                      }}
+                    />
+                  </div>
                 )}
                 <button
                   type="button"

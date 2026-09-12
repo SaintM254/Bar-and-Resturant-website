@@ -7,6 +7,7 @@ import {
   type AdminStats,
 } from "../../lib/api";
 import { sessionExpired } from "./AdminApp";
+import { BookingReceiptModal } from "../BookingReceipt";
 
 type Status = AdminReservation["status"];
 
@@ -59,6 +60,7 @@ export default function BookingsTab({ onSessionExpired }: { onSessionExpired: ()
   const [upcomingOnly, setUpcomingOnly] = useState(true);
   const [dateFilter, setDateFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [receipt, setReceipt] = useState<AdminReservation | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -241,10 +243,31 @@ export default function BookingsTab({ onSessionExpired }: { onSessionExpired: ()
                     {actingId === r.id ? "…" : a.label}
                   </button>
                 ))}
+                <button
+                  type="button"
+                  onClick={() => setReceipt(r)}
+                  className="btn btn-outline btn-sm"
+                >
+                  Receipt
+                </button>
               </div>
             </li>
           ))}
         </ul>
+      )}
+      {receipt && (
+        <BookingReceiptModal
+          details={{
+            ref: receipt.ref,
+            name: receipt.name,
+            phone: receipt.phone,
+            date: receipt.date,
+            time: receipt.time,
+            guestsLabel: receipt.guestsLabel,
+            request: receipt.request,
+          }}
+          onClose={() => setReceipt(null)}
+        />
       )}
     </div>
   );

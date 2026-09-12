@@ -213,3 +213,27 @@ div[id] {
     transition: none;
   }
 }
+
+/* ---------- Booking receipt printing ---------- */
+@page {
+  size: auto;
+  margin: 12mm;
+}
+
+@media print {
+  /* Hide everything except the receipt sheet and its ancestors. */
+  body.printing-receipt #root *:not(:has(.receipt-sheet)):not(.receipt-sheet):not(.receipt-sheet *) {
+    display: none !important;
+  }
+  body.printing-receipt .receipt-sheet {
+    max-width: 420px;
+    margin: 0 auto;
+    border: 1px solid #999 !important;
+    box-shadow: none !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  body.printing-receipt .no-print {
+    display: none !important;
+  }
+}
