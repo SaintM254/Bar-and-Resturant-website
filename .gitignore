@@ -1,0 +1,9 @@
+# dependencies
+node_modules/
+
+# build output
+premium-kenyan-hotel-website/dist/
+
+# logs & OS
+*.log
+.DS_Store
