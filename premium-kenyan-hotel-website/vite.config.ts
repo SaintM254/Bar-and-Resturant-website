@@ -25,6 +25,13 @@ export default defineConfig({
     hmr: {
       clientPort: 443,
     },
+    // Local preview: forward /api calls to the backend (npm start in server/).
+    proxy: {
+      "/api": {
+        target: "http://localhost:3001",
+        changeOrigin: true,
+      },
+    },
   },
   preview: {
     host: "0.0.0.0",

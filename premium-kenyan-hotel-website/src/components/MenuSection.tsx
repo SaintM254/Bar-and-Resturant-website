@@ -59,12 +59,29 @@ function MenuRow({ item, onOpen }: MenuRowProps) {
 export default function MenuSection() {
   const [expanded, setExpanded] = useState(false);
   const [activeItem, setActiveItem] = useState<MenuItem | null>(null);
+  // Live menu from the backend; falls back to the built-in menu when offline
+  // (e.g. the static GitHub Pages site) so the page never breaks.
+  const [live, setLive] = useState<{ featured: MenuItem[]; groups: { group: string; items: MenuItem[] }[] } | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    getMenu()
+      .then((m) => {
+        if (!cancelled && m.featured.length > 0) setLive({ featured: m.featured, groups: m.groups });
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const openItem = useCallback((item: MenuItem) => setActiveItem(item), []);
   const closeItem = useCallback(() => setActiveItem(null), []);
 
-  const first = FEATURED_MENU.slice(0, 5);
-  const second = FEATURED_MENU.slice(5);
+  const featured = live?.featured ?? FEATURED_MENU;
+  const groups = live?.groups ?? EXTRA_MENU;
+  const first = featured.slice(0, 5);
+  const second = featured.slice(5);
 
   return (
     <section id="menu" className="bg-parchment py-20 md:py-28">
@@ -114,7 +131,7 @@ export default function MenuSection() {
         >
           <div className="overflow-hidden">
             <div className="mt-14 grid gap-x-16 gap-y-12 lg:grid-cols-3">
-              {EXTRA_MENU.map((group) => (
+              {groups.map((group) => (
                 <div key={group.group}>
                   <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-gold">
                     {group.group}

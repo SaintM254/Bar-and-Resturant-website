@@ -97,6 +97,15 @@ div[id] {
   font-size: 14px;
 }
 
+.btn-danger {
+  color: var(--color-clay);
+  border-color: rgba(164, 81, 42, 0.55);
+}
+.btn-danger:hover {
+  border-color: var(--color-clay);
+  background-color: rgba(164, 81, 42, 0.07);
+}
+
 /* ---------- Nav ---------- */
 .nav-link {
   position: relative;

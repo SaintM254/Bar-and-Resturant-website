@@ -7,3 +7,6 @@ premium-kenyan-hotel-website/dist/
 # logs & OS
 *.log
 .DS_Store
+
+# backend runtime data (bookings live here — never commit)
+premium-kenyan-hotel-website/server/data/

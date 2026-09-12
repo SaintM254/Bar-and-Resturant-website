@@ -103,7 +103,12 @@ export default function Footer() {
 
         <div className="mt-14 flex flex-col items-start justify-between gap-3 border-t border-[#3B3022] pt-7 text-[13px] text-[#93876F] sm:flex-row sm:items-center">
           <p>© {year} The Acacia House, Nairobi. All rights reserved.</p>
-          <p>Good food. Good company.</p>
+          <p className="flex items-center gap-4">
+            <span>Good food. Good company.</span>
+            <a href="#/admin" className="text-[#6E6455] transition-colors hover:text-[#F6F0E4]">
+              Staff
+            </a>
+          </p>
         </div>
       </div>
     </footer>

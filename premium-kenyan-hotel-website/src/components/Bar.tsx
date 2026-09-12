@@ -1,8 +1,24 @@
+import { useEffect, useState } from "react";
 import { BAR_DRINKS, IMAGES } from "../data";
+import { getMenu, type ApiDrink } from "../lib/api";
 import Reveal from "./Reveal";
 import SectionLabel from "./SectionLabel";
 
 export default function Bar() {
+  // Live bar list from the backend; falls back to the built-in list when offline.
+  const [drinks, setDrinks] = useState<(typeof BAR_DRINKS | ApiDrink[])>(BAR_DRINKS);
+
+  useEffect(() => {
+    let cancelled = false;
+    getMenu()
+      .then((m) => {
+        if (!cancelled && m.drinks.length > 0) setDrinks(m.drinks);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   return (
     <section id="bar" className="border-b border-line bg-sand py-20 md:py-28">
       <div className="mx-auto max-w-[1200px] px-5 sm:px-8">
@@ -27,7 +43,7 @@ export default function Bar() {
 
             <Reveal delay={280}>
               <div className="mt-9 border-t border-[#DBCCB2]">
-                {BAR_DRINKS.map((drink) => (
+                {drinks.map((drink) => (
                   <div key={drink.name} className="border-b border-[#DBCCB2] py-4">
                     <div className="flex items-baseline gap-3">
                       <h3 className="font-serif text-[18px] font-medium text-ink">{drink.name}</h3>

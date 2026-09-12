@@ -32,6 +32,9 @@ function PullQuote() {
 }
 
 export default function App() {
+  const isAdmin = useIsAdminRoute();
+  if (isAdmin) return <AdminApp />;
+
   return (
     <div className="min-h-screen bg-ivory font-sans text-ink">
       <Header />

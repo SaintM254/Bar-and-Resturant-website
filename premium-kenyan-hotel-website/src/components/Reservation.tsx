@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { CONTACT } from "../data";
+import { ApiError, createReservation } from "../lib/api";
 import Reveal from "./Reveal";
 import SectionLabel from "./SectionLabel";
 
@@ -137,10 +138,20 @@ export default function Reservation() {
                   at <span className="font-medium text-ink">{form.time}</span>. We will confirm by
                   phone within the hour, between 8:00 and 21:00.
                 </p>
+                {bookingRef && (
+                  <p className="mt-6 inline-block border border-dashed border-gold bg-ivory px-5 py-3 text-sm text-body">
+                    Booking reference:{" "}
+                    <span className="font-semibold tracking-wider text-ink">{bookingRef}</span>
+                    <span className="mt-1 block text-[13px] text-mute">
+                      Please show this code when you arrive.
+                    </span>
+                  </p>
+                )}
                 <button
                   type="button"
                   onClick={() => {
                     setSubmitted(false);
+                    setBookingRef("");
                     setForm(initialForm);
                   }}
                   className="btn btn-outline mt-9"
@@ -245,8 +256,12 @@ export default function Reservation() {
                     />
                   </div>
                 </div>
-                <button type="submit" className="btn btn-primary mt-7 w-full sm:w-auto">
-                  Make Reservation
+                <button
+                  type="submit"
+                  disabled={sending}
+                  className="btn btn-primary mt-7 w-full sm:w-auto disabled:cursor-wait disabled:opacity-60"
+                >
+                  {sending ? "Sending…" : "Make Reservation"}
                 </button>
               </form>
             )}

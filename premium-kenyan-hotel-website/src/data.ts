@@ -153,7 +153,7 @@ export const EXTRA_MENU: { group: string; items: MenuItem[] }[] = [
   },
 ];
 
-export const BAR_DRINKS: Omit<MenuItem, "img" | "thumb">[] = [
+export const BAR_DRINKS: (Omit<MenuItem, "img" | "thumb"> & { id?: string })[] = [
   {
     name: "Dawa",
     desc: "Kenya's classic — vodka, honey and lime over crushed ice.",
