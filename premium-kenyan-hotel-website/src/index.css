@@ -1,0 +1,206 @@
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Fraunces", Georgia, serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  --color-ivory: #faf7f1;
+  --color-parchment: #fcfaf5;
+  --color-cream: #f4eede;
+  --color-sand: #efe7d3;
+  --color-ink: #221b12;
+  --color-bark: #241c12;
+  --color-body: #564c3f;
+  --color-mute: #8a7e6f;
+  --color-line: #e3dac9;
+  --color-clay: #a4512a;
+  --color-clay-deep: #85401f;
+  --color-gold: #b08d4f;
+
+  --animate-none: none;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-ivory);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+::selection {
+  background-color: #a4512a;
+  color: #fbf7ef;
+}
+
+section[id],
+div[id] {
+  scroll-margin-top: 84px;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 28px;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease;
+}
+
+.btn-primary {
+  background-color: var(--color-clay);
+  color: #fbf7ef;
+}
+.btn-primary:hover {
+  background-color: var(--color-clay-deep);
+}
+
+.btn-outline {
+  background-color: transparent;
+  color: var(--color-ink);
+  border-color: rgba(34, 27, 18, 0.32);
+}
+.btn-outline:hover {
+  border-color: var(--color-ink);
+  background-color: rgba(34, 27, 18, 0.035);
+}
+
+.btn-outline-light {
+  background-color: transparent;
+  color: #fbf7ef;
+  border-color: rgba(251, 247, 239, 0.55);
+}
+.btn-outline-light:hover {
+  border-color: #fbf7ef;
+  background-color: rgba(251, 247, 239, 0.08);
+}
+
+.btn-sm {
+  padding: 11px 22px;
+  font-size: 14px;
+}
+
+/* ---------- Nav ---------- */
+.nav-link {
+  position: relative;
+}
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -5px;
+  width: 100%;
+  height: 1px;
+  background-color: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.35s ease;
+}
+.nav-link:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* ---------- Menu leaders ---------- */
+.leader {
+  flex: 1 1 auto;
+  border-bottom: 1px dotted #ccc0a9;
+  transform: translateY(-4px);
+  min-width: 24px;
+}
+
+/* ---------- Form fields ---------- */
+.field {
+  width: 100%;
+  background-color: #fff;
+  border: 1px solid #ddd2bf;
+  border-radius: 4px;
+  padding: 12px 14px;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  color: var(--color-ink);
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+.field::placeholder {
+  color: #a89b88;
+}
+.field:focus {
+  outline: none;
+  border-color: var(--color-clay);
+  box-shadow: 0 0 0 1px var(--color-clay);
+}
+
+.field-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-mute);
+  margin-bottom: 7px;
+}
+
+/* ---------- Scroll reveal ---------- */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.9s cubic-bezier(0.22, 0.61, 0.36, 1),
+    transform 0.9s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---------- Image hover ---------- */
+.img-zoom {
+  overflow: hidden;
+}
+.img-zoom img {
+  transition: transform 1.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.img-zoom:hover img {
+  transform: scale(1.035);
+}
+
+/* ---------- Map ---------- */
+.map-tint iframe {
+  filter: grayscale(1) sepia(0.18) contrast(0.96);
+  display: block;
+  width: 100%;
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .img-zoom img {
+    transition: none;
+  }
+}
