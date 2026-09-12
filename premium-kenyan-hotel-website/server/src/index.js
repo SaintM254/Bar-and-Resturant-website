@@ -2,11 +2,14 @@
 //   Public : GET  /api/health, /api/config, /api/menu ; POST /api/reservations
 //   Staff  : POST /api/admin/login ; GET/PATCH /api/admin/reservations ;
 //            GET/POST/PUT/DELETE /api/admin/menu/items + /drinks ; GET /api/admin/stats
+//
+// Storage: Postgres when DATABASE_URL is set (production), else local JSON
+// files (preview). See store.js.
 
 import express from "express";
 import cors from "cors";
 import { config, RESERVATION_STATUS, MENU_GROUP_LABELS } from "./config.js";
-import { initDb, mutate, db, newId, newBookingRef } from "./db.js";
+import { getStore, newId, newBookingRef } from "./store.js";
 import { slugify } from "./seed.js";
 import {
   validateReservation,
@@ -29,7 +32,10 @@ if (config.allowedOrigins.length > 0) {
   app.use(cors());
 }
 
-initDb();
+// Express 4 doesn't catch async errors — wrap every async handler.
+const ah = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+
+const store = await getStore();
 
 /* ---------------- public helpers ---------------- */
 
@@ -60,8 +66,8 @@ function publicDrink(drink) {
   };
 }
 
-function publicMenuPayload() {
-  const { menuItems, drinks } = db();
+async function publicMenuPayload() {
+  const [menuItems, drinks] = await Promise.all([store.listMenuItems(), store.listDrinks()]);
   const live = menuItems.filter((i) => i.available);
   return {
     featured: live.filter((i) => i.category === "featured").map(publicMenuItem),
@@ -73,11 +79,13 @@ function publicMenuPayload() {
   };
 }
 
-/** Seats already taken for a date+time (ignores cancelled & no-show). */
-function seatsTaken(date, time) {
-  return db()
-    .reservations.filter((r) => r.date === date && r.time === time && !["cancelled", "no-show"].includes(r.status))
-    .reduce((sum, r) => sum + r.guestsCount, 0);
+function uniqueId(existingIds, base) {
+  const ids = new Set(existingIds);
+  const id = slugify(base) || "item";
+  if (!ids.has(id)) return id;
+  let n = 2;
+  while (ids.has(`${id}-${n}`)) n += 1;
+  return `${id}-${n}`;
 }
 
 /* ---------------- public routes ---------------- */
@@ -95,19 +103,19 @@ app.get("/api/config", (req, res) => {
   });
 });
 
-app.get("/api/menu", (req, res) => {
-  res.json(publicMenuPayload());
-});
+app.get("/api/menu", ah(async (req, res) => {
+  res.json(await publicMenuPayload());
+}));
 
 app.post(
   "/api/reservations",
   rateLimit({ windowMs: 60_000, max: 20, message: "Too many booking attempts — please wait a minute and try again." }),
-  (req, res) => {
+  ah(async (req, res) => {
     const parsed = validateReservation(req.body);
     if (!parsed.ok) return res.status(400).json({ error: "Please check the form.", fields: parsed.errors });
 
     const { date, time, guestsCount } = parsed.value;
-    const taken = seatsTaken(date, time);
+    const taken = await store.countSeats(date, time);
     if (taken + guestsCount > config.maxGuestsPerSlot) {
       return res.status(409).json({
         error: `Sorry, ${time} on that day is fully booked — please choose another time.`,
@@ -115,17 +123,13 @@ app.post(
       });
     }
 
-    const reservation = mutate((store) => {
-      const row = {
-        id: newId("rsv"),
-        ref: newBookingRef(),
-        ...parsed.value,
-        status: "pending",
-        source: "website",
-        createdAt: new Date().toISOString(),
-      };
-      store.reservations.push(row);
-      return row;
+    const reservation = await store.createReservation({
+      id: newId("rsv"),
+      ref: newBookingRef(),
+      ...parsed.value,
+      status: "pending",
+      source: "website",
+      createdAt: new Date().toISOString(),
     });
 
     res.status(201).json({
@@ -138,7 +142,7 @@ app.post(
         guests: reservation.guestsLabel,
       },
     });
-  }
+  })
 );
 
 /* ---------------- staff auth ---------------- */
@@ -166,132 +170,93 @@ app.post("/api/admin/logout", requireAdmin, (req, res) => {
 
 /* ---------------- staff: reservations ---------------- */
 
-app.get("/api/admin/reservations", requireAdmin, (req, res) => {
+app.get("/api/admin/reservations", requireAdmin, ah(async (req, res) => {
   const { date = "", status = "", upcoming = "" } = req.query;
-  const today = todayNairobi();
-  let rows = [...db().reservations];
-  if (date) rows = rows.filter((r) => r.date === date);
-  if (status) rows = rows.filter((r) => r.status === status);
-  if (upcoming === "1") rows = rows.filter((r) => r.date >= today && !["cancelled", "no-show"].includes(r.status));
-  rows.sort((a, b) => (a.date + a.time < b.date + b.time ? -1 : 1));
+  const rows = await store.listReservations({
+    date,
+    status,
+    upcoming: upcoming === "1",
+    today: todayNairobi(),
+  });
   res.json({ reservations: rows });
-});
+}));
 
-app.patch("/api/admin/reservations/:id", requireAdmin, (req, res) => {
+app.patch("/api/admin/reservations/:id", requireAdmin, ah(async (req, res) => {
   const { status } = req.body || {};
   if (!RESERVATION_STATUS.includes(status)) {
     return res.status(400).json({ error: `Status must be one of: ${RESERVATION_STATUS.join(", ")}.` });
   }
-  const updated = mutate((store) => {
-    const row = store.reservations.find((r) => r.id === req.params.id);
-    if (!row) return null;
-    row.status = status;
-    row.updatedAt = new Date().toISOString();
-    return row;
-  });
+  const updated = await store.setReservationStatus(req.params.id, status);
   if (!updated) return res.status(404).json({ error: "Booking not found." });
   res.json({ message: `Booking ${updated.ref} marked as ${status}.`, reservation: updated });
-});
+}));
 
-app.get("/api/admin/stats", requireAdmin, (req, res) => {
+app.get("/api/admin/stats", requireAdmin, ah(async (req, res) => {
   const today = todayNairobi();
-  const rows = db().reservations.filter((r) => !["cancelled", "no-show"].includes(r.status));
-  res.json({
-    today: todayNairobi(),
-    pending: rows.filter((r) => r.status === "pending").length,
-    todayCount: rows.filter((r) => r.date === today).length,
-    upcomingCount: rows.filter((r) => r.date >= today).length,
-    upcomingGuests: rows.filter((r) => r.date >= today).reduce((s, r) => s + r.guestsCount, 0),
-  });
-});
+  res.json({ today, ...(await store.stats(today)) });
+}));
 
 /* ---------------- staff: menu ---------------- */
 
-app.get("/api/admin/menu", requireAdmin, (req, res) => {
-  res.json({ items: db().menuItems, drinks: db().drinks });
-});
+app.get("/api/admin/menu", requireAdmin, ah(async (req, res) => {
+  const [items, drinks] = await Promise.all([store.listMenuItems(), store.listDrinks()]);
+  res.json({ items, drinks });
+}));
 
-function uniqueId(collection, base) {
-  const ids = new Set(collection.map((x) => x.id));
-  let id = slugify(base) || "item";
-  if (!ids.has(id)) return id;
-  let n = 2;
-  while (ids.has(`${id}-${n}`)) n += 1;
-  return `${id}-${n}`;
-}
-
-app.post("/api/admin/menu/items", requireAdmin, (req, res) => {
+app.post("/api/admin/menu/items", requireAdmin, ah(async (req, res) => {
   const parsed = validateMenuItem(req.body);
   if (!parsed.ok) return res.status(400).json({ error: "Please check the dish.", fields: parsed.errors });
-  const item = mutate((store) => {
-    const row = { id: uniqueId(store.menuItems, parsed.value.name), ...parsed.value };
-    store.menuItems.push(row);
-    return row;
+  const existing = await store.listMenuItems();
+  const item = await store.createMenuItem({
+    id: uniqueId(existing.map((i) => i.id), parsed.value.name),
+    ...parsed.value,
   });
   res.status(201).json({ message: "Dish added.", item });
-});
+}));
 
-app.put("/api/admin/menu/items/:id", requireAdmin, (req, res) => {
+app.put("/api/admin/menu/items/:id", requireAdmin, ah(async (req, res) => {
   const parsed = validateMenuItem(req.body, { partial: true });
   if (!parsed.ok) return res.status(400).json({ error: "Please check the dish.", fields: parsed.errors });
-  const item = mutate((store) => {
-    const row = store.menuItems.find((i) => i.id === req.params.id);
-    if (!row) return null;
-    Object.assign(row, parsed.value);
-    return row;
-  });
+  const item = await store.updateMenuItem(req.params.id, parsed.value);
   if (!item) return res.status(404).json({ error: "Dish not found." });
   res.json({ message: "Dish updated.", item });
-});
+}));
 
-app.delete("/api/admin/menu/items/:id", requireAdmin, (req, res) => {
-  const removed = mutate((store) => {
-    const idx = store.menuItems.findIndex((i) => i.id === req.params.id);
-    if (idx === -1) return null;
-    return store.menuItems.splice(idx, 1)[0];
-  });
+app.delete("/api/admin/menu/items/:id", requireAdmin, ah(async (req, res) => {
+  const removed = await store.deleteMenuItem(req.params.id);
   if (!removed) return res.status(404).json({ error: "Dish not found." });
   res.json({ message: `“${removed.name}” removed from the menu.` });
-});
+}));
 
-app.post("/api/admin/menu/drinks", requireAdmin, (req, res) => {
+app.post("/api/admin/menu/drinks", requireAdmin, ah(async (req, res) => {
   const parsed = validateDrink(req.body);
   if (!parsed.ok) return res.status(400).json({ error: "Please check the drink.", fields: parsed.errors });
-  const drink = mutate((store) => {
-    const row = { id: uniqueId(store.drinks, parsed.value.name), ...parsed.value };
-    store.drinks.push(row);
-    return row;
+  const existing = await store.listDrinks();
+  const drink = await store.createDrink({
+    id: uniqueId(existing.map((d) => d.id), parsed.value.name),
+    ...parsed.value,
   });
   res.status(201).json({ message: "Drink added.", drink });
-});
+}));
 
-app.put("/api/admin/menu/drinks/:id", requireAdmin, (req, res) => {
+app.put("/api/admin/menu/drinks/:id", requireAdmin, ah(async (req, res) => {
   const parsed = validateDrink(req.body, { partial: true });
   if (!parsed.ok) return res.status(400).json({ error: "Please check the drink.", fields: parsed.errors });
-  const drink = mutate((store) => {
-    const row = store.drinks.find((d) => d.id === req.params.id);
-    if (!row) return null;
-    Object.assign(row, parsed.value);
-    return row;
-  });
+  const drink = await store.updateDrink(req.params.id, parsed.value);
   if (!drink) return res.status(404).json({ error: "Drink not found." });
   res.json({ message: "Drink updated.", drink });
-});
+}));
 
-app.delete("/api/admin/menu/drinks/:id", requireAdmin, (req, res) => {
-  const removed = mutate((store) => {
-    const idx = store.drinks.findIndex((d) => d.id === req.params.id);
-    if (idx === -1) return null;
-    return store.drinks.splice(idx, 1)[0];
-  });
+app.delete("/api/admin/menu/drinks/:id", requireAdmin, ah(async (req, res) => {
+  const removed = await store.deleteDrink(req.params.id);
   if (!removed) return res.status(404).json({ error: "Drink not found." });
   res.json({ message: `“${removed.name}” removed from the bar list.` });
-});
+}));
 
 /* ---------------- status page (so opening the API address isn't a blank screen) ---------------- */
 
-app.get("/", (req, res) => {
-  const bookings = db().reservations.length;
+app.get("/", ah(async (req, res) => {
+  const rows = await store.listReservations({});
   res.send(`<!doctype html>
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
@@ -303,11 +268,11 @@ a{color:#a4512a}p{line-height:1.7;color:#564c3f}</style></head>
 <body><div class="card">
 <h1>The Acacia House — API</h1>
 <p class="ok">● Backend is running</p>
-<p>${bookings} booking(s) stored. This address is for the app's data only —
+<p>${rows.length} booking(s) stored. This address is for the app's data only —
 please use the <strong>Restaurant Website</strong> preview to see the site.</p>
 <p><a href="/api/health">health check</a> · <a href="/api/menu">menu data</a></p>
 </div></body></html>`);
-});
+}));
 
 /* ---------------- fallback + errors ---------------- */
 
@@ -327,6 +292,9 @@ app.listen(config.port, "0.0.0.0", () => {
   console.log(`  Health check: http://localhost:${config.port}/api/health`);
   if (!process.env.ADMIN_PASSWORD) {
     console.log(`  Staff password (default, set ADMIN_PASSWORD to change): ${config.adminPassword}`);
+  }
+  if (!process.env.DATABASE_URL) {
+    console.log(`  Tip: set DATABASE_URL to use Postgres instead of JSON files.`);
   }
   if (config.allowedOrigins.length === 0) {
     console.log(`  CORS: allowing all origins (preview mode — set ALLOWED_ORIGIN in production)`);

@@ -1,0 +1,28 @@
+# Render Blueprint — deploys the Acacia House backend API in a few clicks.
+#
+# Steps for the site owner (no coding):
+#   1. On render.com: Dashboard -> New -> Blueprint.
+#   2. Pick the Bar-and-Resturant-website repo and the
+#      arena/01a094a2-bar-and-resturant-website branch.
+#   3. Give the service a name (or keep acacia-house-api), then fill in:
+#        DATABASE_URL   -> paste the Neon connection string (postgresql://...)
+#        ADMIN_PASSWORD -> invent a strong staff password (store it safely!)
+#   4. Deploy. Render shows the live API address when done, e.g.
+#      https://acacia-house-api.onrender.com — the website is then pointed at it.
+
+services:
+  - type: web
+    name: acacia-house-api
+    runtime: node
+    rootDir: premium-kenyan-hotel-website/server
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        sync: false # paste Neon connection string at deploy time
+      - key: ADMIN_PASSWORD
+        sync: false # your own staff password at deploy time
+      - key: ALLOWED_ORIGIN
+        value: https://saintm254.github.io
