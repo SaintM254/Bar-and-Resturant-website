@@ -1,8 +1,20 @@
 // Talks to the Acacia House backend.
-// - In local preview the dev server forwards /api to the backend (see vite.config.ts).
-// - For a hosted backend, rebuild with:  VITE_API_URL=https://your-api.example.com npm run build
+// - On the public site it uses the live API baked in at build time (VITE_API_URL).
+// - On local hostnames (localhost, Arena preview) it uses same-origin /api,
+//   which the dev/preview server forwards to the local backend — so testing
+//   in the preview never touches the real production bookings.
 
-const API_BASE = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, "") ?? "";
+const PROD_API = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, "") ?? "";
+
+function apiBase(): string {
+  if (typeof window !== "undefined") {
+    const host = window.location.hostname;
+    if (host === "localhost" || host === "127.0.0.1" || host.endsWith(".e2b.app")) return "";
+  }
+  return PROD_API;
+}
+
+const API_BASE = apiBase();
 
 export interface ApiMenuItem {
   id: string;
