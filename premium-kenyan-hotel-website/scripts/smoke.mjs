@@ -62,6 +62,11 @@ const dom = new JSDOM(html, {
       unobserve() {}
       disconnect() {}
     };
+    // Spy on scroll-to-top calls (regression test: menu clicks must not scroll home).
+    window.__scrollCalls = [];
+    window.scrollTo = (...args) => {
+      window.__scrollCalls.push(args);
+    };
     // Route relative /api calls to the real backend under test.
     const nativeFetch = globalThis.fetch;
     window.fetch = (input, init) => {
@@ -96,6 +101,21 @@ const rootText = document.getElementById("root")?.textContent ?? "";
 check("app renders into #root", rootText.length > 500, `${rootText.length} chars`);
 check("brand visible", rootText.includes("Acacia House"));
 check("design inlined (<style>)", !!document.querySelector("style"));
+
+// --- NAV TEST: top-bar links must not yank the page back home ---
+const barLink = document.querySelector('header nav a[href="#bar"]');
+check("found top-bar 'Bar' link", !!barLink);
+if (barLink) {
+  window.__scrollCalls.length = 0;
+  barLink.click();
+  await tick(400);
+  check("clicking Bar sets address to #bar", window.location.hash === "#bar", window.location.hash);
+  check(
+    "menu click does not scroll home",
+    window.__scrollCalls.length === 0,
+    `${window.__scrollCalls.length} scroll call(s)`
+  );
+}
 
 // --- CLICK TEST 1: expand the full menu ---
 const expandBtn = [...document.querySelectorAll("button")].find((b) =>
@@ -146,6 +166,25 @@ if (nameInput && phoneInput && dateInput) {
     return m ? m[0] : null;
   }, 12000);
   check("reservation submits to backend, ref shown", !!ref, ref || "no ref appeared");
+}
+
+// --- STAFF AREA TEST: #/admin switches view, logs in, shows bookings ---
+window.__scrollCalls.length = 0;
+window.location.hash = "#/admin";
+const adminLogin = await waitFor(() => document.getElementById("admin-password"), 4000);
+check("staff login screen appears at #/admin", !!adminLogin);
+check("entering staff area scrolls to top", window.__scrollCalls.length === 1);
+if (adminLogin) {
+  const proto = window.HTMLInputElement.prototype;
+  Object.getOwnPropertyDescriptor(proto, "value").set.call(adminLogin, "acacia2026");
+  adminLogin.dispatchEvent(new window.Event("input", { bubbles: true }));
+  await tick(200);
+  adminLogin.closest("form").dispatchEvent(new window.Event("submit", { bubbles: true, cancelable: true }));
+  const dash = await waitFor(() => document.body.textContent.includes("Needs confirm"), 8000);
+  check("staff login works, dashboard loads", !!dash);
+  window.location.hash = "#home";
+  const backHome = await waitFor(() => document.body.textContent.includes("Reserve Your Table"), 4000);
+  check("leaving #/admin returns to the website", !!backHome);
 }
 
 check("no JS errors during test", errors.length === 0, errors.slice(0, 3).join(" | "));

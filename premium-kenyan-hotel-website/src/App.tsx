@@ -17,8 +17,13 @@ function useIsAdminRoute() {
   const [isAdmin, setIsAdmin] = useState(read);
   useEffect(() => {
     const onHash = () => {
-      setIsAdmin(read());
-      window.scrollTo(0, 0);
+      const next = read();
+      // Only jump to the top when actually switching between the website
+      // and the staff area — never on normal menu clicks (#menu, #bar…).
+      setIsAdmin((prev) => {
+        if (prev !== next) window.scrollTo(0, 0);
+        return next;
+      });
     };
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
