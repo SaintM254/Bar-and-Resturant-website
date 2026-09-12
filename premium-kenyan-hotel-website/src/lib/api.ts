@@ -141,10 +141,14 @@ async function adminReq<T>(path: string, init?: RequestInit): Promise<T> {
 export const getMenu = () => req<ApiMenu>("/api/menu");
 
 export const createReservation = (input: ReservationInput) =>
-  req<{ message: string; reservation: BookingResult }>("/api/reservations", {
-    method: "POST",
-    body: JSON.stringify(input),
-  });
+  req<{ message: string; reservation: BookingResult }>(
+    "/api/reservations",
+    {
+      method: "POST",
+      body: JSON.stringify(input),
+    },
+    45000 // free-tier backends nap when idle; the first request can take ~30s to wake them
+  );
 
 /* ---------- staff ---------- */
 
