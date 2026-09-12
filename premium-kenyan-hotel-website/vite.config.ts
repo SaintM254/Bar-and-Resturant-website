@@ -35,8 +35,15 @@ export default defineConfig({
   },
   preview: {
     host: "0.0.0.0",
-    port: 4173,
+    port: 5173,
     strictPort: true,
     allowedHosts: true,
+    // Production preview: forward /api calls to the backend, same as dev.
+    proxy: {
+      "/api": {
+        target: "http://localhost:3001",
+        changeOrigin: true,
+      },
+    },
   },
 });

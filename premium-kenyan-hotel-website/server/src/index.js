@@ -288,6 +288,27 @@ app.delete("/api/admin/menu/drinks/:id", requireAdmin, (req, res) => {
   res.json({ message: `“${removed.name}” removed from the bar list.` });
 });
 
+/* ---------------- status page (so opening the API address isn't a blank screen) ---------------- */
+
+app.get("/", (req, res) => {
+  const bookings = db().reservations.length;
+  res.send(`<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Acacia House API</title>
+<style>body{font-family:Georgia,serif;background:#faf7f1;color:#221b12;display:flex;min-height:100vh;align-items:center;justify-content:center;margin:0}
+.card{border:1px solid #e3dac9;background:#fcfaf5;padding:40px 48px;max-width:520px;text-align:center}
+h1{font-weight:500;margin:0 0 8px}.ok{color:#2e7d4f;font-weight:bold}
+a{color:#a4512a}p{line-height:1.7;color:#564c3f}</style></head>
+<body><div class="card">
+<h1>The Acacia House — API</h1>
+<p class="ok">● Backend is running</p>
+<p>${bookings} booking(s) stored. This address is for the app's data only —
+please use the <strong>Restaurant Website</strong> preview to see the site.</p>
+<p><a href="/api/health">health check</a> · <a href="/api/menu">menu data</a></p>
+</div></body></html>`);
+});
+
 /* ---------------- fallback + errors ---------------- */
 
 app.use("/api", (req, res) => res.status(404).json({ error: "Unknown API address." }));
